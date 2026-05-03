@@ -1,3 +1,4 @@
+/* ─── Design Tokens ─────────────────────────────── */
 :root {
   color-scheme: dark;
   font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif;
@@ -15,17 +16,19 @@
   --eval-inaccuracy: #f1d64b;
   --eval-mistake: #f3a43b;
   --eval-blunder: #f05353;
-  --shadow: 0 32px 80px rgba(0, 0, 0, 0.45);
+  --shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
 }
 
 * {
   box-sizing: border-box;
 }
 
+/* ─── Root: Lock to viewport, no page scroll ─────── */
 html,
 body,
 #root {
-  min-height: 100%;
+  height: 100%;
+  overflow: hidden;
 }
 
 body {
@@ -41,10 +44,14 @@ button {
   font: inherit;
 }
 
+/* ─── App Shell: 2-row grid (top-bar + workspace) ── */
 .app-shell {
   position: relative;
-  min-height: 100vh;
-  padding: 40px 28px 28px;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  height: 100dvh;
+  padding: 10px 18px 12px;
+  gap: 10px;
   overflow: hidden;
 }
 
@@ -58,17 +65,47 @@ button {
   pointer-events: none;
 }
 
-.hero-copy,
-.workspace {
+/* ─── Top Bar ────────────────────────────────────── */
+.top-bar {
   position: relative;
   z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px;
+  flex-shrink: 0;
+  min-height: 36px;
 }
 
-.hero-copy {
-  max-width: 760px;
-  margin: 0 auto 28px;
+.top-bar-brand {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
 }
 
+.top-bar-brand h1 {
+  margin: 0;
+  font-size: 1.12rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  background: linear-gradient(90deg, #eff5ff, #7fd0ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.top-bar-badge {
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(127, 208, 255, 0.28);
+  background: rgba(127, 208, 255, 0.08);
+  color: #7fd0ff;
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ─── Typography helpers ─────────────────────────── */
 .eyebrow,
 .panel-label,
 .muted,
@@ -79,39 +116,52 @@ button {
 
 .eyebrow,
 .panel-label {
-  margin: 0 0 10px;
-  font-size: 0.72rem;
+  margin: 0 0 8px;
+  font-size: 0.66rem;
   color: #7fd0ff;
 }
 
-.hero-copy h1 {
-  margin: 0;
-  font-size: clamp(3rem, 5vw, 4.6rem);
-  line-height: 0.94;
-}
-
-.subtitle {
-  max-width: 680px;
-  margin: 14px 0 0;
-  font-size: 1rem;
-  line-height: 1.7;
-  color: var(--muted);
-}
-
+/* ─── Workspace: 3-column grid ───────────────────── */
 .workspace {
+  position: relative;
+  z-index: 1;
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(320px, 420px);
-  gap: 24px;
-  align-items: start;
-  max-width: 1460px;
-  margin: 0 auto;
+  grid-template-columns: 196px 1fr 220px;
+  grid-template-areas: "left board right";
+  gap: 14px;
+  min-height: 0; /* critical — prevents grid row overflow */
 }
 
-.board-panel,
-.sidebar {
+/* ─── Left column (eval + status + controls) ──────── */
+.left-col {
+  grid-area: left;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ─── Board column ────────────────────────────────── */
+.board-panel {
+  grid-area: board;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   min-width: 0;
+  min-height: 0;
 }
 
+/* ─── Right column (move history) ────────────────── */
+.right-col {
+  grid-area: right;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ─── Panel base ──────────────────────────────────── */
 .board-frame,
 .panel,
 .eval-card {
@@ -121,18 +171,39 @@ button {
   box-shadow: var(--shadow);
 }
 
+.panel,
+.eval-card {
+  border-radius: 20px;
+  padding: 12px 14px;
+}
+
+/* Compact panels inside left column */
+.left-col .panel,
+.left-col .eval-card {
+  border-radius: 18px;
+  padding: 11px 13px;
+}
+
+/* ─── Board Frame & Surface ───────────────────────── */
 .board-frame {
-  padding: 18px;
-  border-radius: 34px;
+  padding: 13px;
+  border-radius: 28px;
+  flex-shrink: 0;
 }
 
 .board-surface {
   position: relative;
   display: grid;
   grid-template-columns: repeat(8, 1fr);
+  /* ── Scaling formula:
+     width = min(52vw, 100dvh − 100px)
+     At 1366×768 → min(710px, 668px) = 668px  ✓
+     At 1280×720 → min(666px, 620px) = 620px  ✓
+     At 1920×1080 → min(998px, 980px) = 980px ✓  */
+  width: min(52vw, calc(100dvh - 100px));
   aspect-ratio: 1;
   overflow: hidden;
-  border-radius: 26px;
+  border-radius: 22px;
   box-shadow:
     inset 0 0 0 1px var(--board-edge),
     inset 0 16px 30px rgba(255, 255, 255, 0.06);
@@ -148,6 +219,7 @@ button {
   pointer-events: none;
 }
 
+/* ─── Board Squares ───────────────────────────────── */
 .board-square {
   position: relative;
   border: 0;
@@ -192,6 +264,7 @@ button {
   border: 1px solid rgba(255, 255, 255, 0.18);
 }
 
+/* ─── Move Quality Tones ─────────────────────────── */
 .board-square.best,
 .floating-badge.best,
 .quality-tag.best {
@@ -239,6 +312,7 @@ button {
   animation: pulse-square 1.35s ease-out;
 }
 
+/* ─── Board Labels ────────────────────────────────── */
 .move-dot {
   position: absolute;
   inset: 0;
@@ -269,6 +343,7 @@ button {
   bottom: 8px;
 }
 
+/* ─── Piece Layer ─────────────────────────────────── */
 .piece-layer {
   position: absolute;
   inset: 0;
@@ -331,6 +406,7 @@ button {
   animation: capture-pop 220ms ease forwards;
 }
 
+/* ─── Floating Badge ──────────────────────────────── */
 .floating-badge {
   position: absolute;
   padding: 9px 12px;
@@ -346,27 +422,17 @@ button {
   white-space: nowrap;
 }
 
-.sidebar {
-  display: grid;
-  gap: 18px;
-}
-
-.eval-card,
-.panel {
-  border-radius: 26px;
-  padding: 18px;
-}
-
+/* ─── Eval Card ───────────────────────────────────── */
 .eval-card {
   display: grid;
-  grid-template-columns: 68px 1fr;
-  gap: 16px;
+  grid-template-columns: 52px 1fr;
+  gap: 10px;
   align-items: center;
 }
 
 .eval-bar {
   position: relative;
-  height: 230px;
+  height: min(150px, 18vh);
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.08);
   overflow: hidden;
@@ -384,19 +450,25 @@ button {
 .status-card h2,
 .hint-card h3 {
   margin: 0;
-  font-size: 1.7rem;
+  font-size: 1.4rem;
 }
 
 .muted {
-  margin: 6px 0 0;
+  margin: 4px 0 0;
   color: var(--muted);
-  font-size: 0.76rem;
+  font-size: 0.72rem;
 }
 
+/* ─── Status Card ─────────────────────────────────── */
+.status-card h2 {
+  font-size: 1.05rem;
+}
+
+/* ─── Controls ────────────────────────────────────── */
 .controls-card {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
+  gap: 8px;
 }
 
 .controls-card-modes {
@@ -404,12 +476,13 @@ button {
 }
 
 .ui-button {
-  padding: 12px 14px;
-  border-radius: 16px;
+  padding: 9px 10px;
+  border-radius: 13px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: rgba(255, 255, 255, 0.05);
   color: var(--text);
   cursor: pointer;
+  font-size: 0.82rem;
   transition:
     transform 160ms ease,
     border-color 160ms ease,
@@ -433,9 +506,9 @@ button {
 .mode-pill,
 .rank-pill,
 .thinking-line {
-  margin: 10px 0 0;
+  margin: 6px 0 0;
   color: #7fd0ff;
-  font-size: 0.82rem;
+  font-size: 0.76rem;
 }
 
 .rank-pill {
@@ -446,27 +519,29 @@ button {
   color: #93ffca;
 }
 
+/* ─── Bot Rank ────────────────────────────────────── */
 .rank-card {
   display: grid;
-  gap: 14px;
+  gap: 10px;
 }
 
 .rank-list {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
+  gap: 6px;
 }
 
 .rank-option {
   display: grid;
-  gap: 4px;
-  padding: 12px 14px;
-  border-radius: 16px;
+  gap: 2px;
+  padding: 8px 10px;
+  border-radius: 13px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: rgba(255, 255, 255, 0.04);
   color: var(--text);
   text-align: left;
   cursor: pointer;
+  font-size: 0.82rem;
   transition:
     transform 160ms ease,
     border-color 160ms ease,
@@ -475,7 +550,7 @@ button {
 
 .rank-option span {
   color: var(--muted);
-  font-size: 0.82rem;
+  font-size: 0.74rem;
 }
 
 .rank-option:hover {
@@ -488,39 +563,72 @@ button {
   background: linear-gradient(135deg, rgba(255, 216, 152, 0.14), rgba(127, 208, 255, 0.08));
 }
 
+/* ─── Move History ────────────────────────────────── */
+.history-card {
+  flex: 1 1 0;          /* fills remaining column height */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+}
+
 .history-head,
 .history-row {
   display: grid;
   grid-template-columns: auto 1fr;
-  gap: 12px;
+  gap: 10px;
   align-items: start;
 }
 
+/* The ONE intentional internal scroll */
 .history-list {
   display: grid;
-  gap: 12px;
-  max-height: 380px;
-  overflow: auto;
+  gap: 6px;
+  flex: 1 1 0;
+  overflow-y: auto;
+  overflow-x: hidden;
   padding-right: 4px;
+  align-content: start;
+  min-height: 0;
+}
+
+/* Custom scrollbar */
+.history-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.history-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.history-list::-webkit-scrollbar-thumb {
+  background: rgba(127, 208, 255, 0.2);
+  border-radius: 999px;
 }
 
 .history-row {
-  padding: 12px 0;
+  padding: 8px 0;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .move-index {
   color: #7fd0ff;
-  font-size: 0.74rem;
+  font-size: 0.72rem;
   padding-top: 2px;
 }
 
 .quality-tag {
-  margin: 6px 0 0;
+  margin: 4px 0 0;
   color: var(--tone, var(--muted));
-  font-size: 0.82rem;
+  font-size: 0.76rem;
 }
 
+/* Hint card */
+.hint-card h3 {
+  font-size: 1rem;
+}
+
+/* ─── Animations ──────────────────────────────────── */
 @keyframes badge-rise {
   0% {
     opacity: 0;
@@ -560,43 +668,70 @@ button {
   }
 }
 
+/* ─── Responsive Fallback (<= 1100px) ────────────── */
 @media (max-width: 1100px) {
   .workspace {
-    grid-template-columns: 1fr;
+    grid-template-columns: 180px 1fr 200px;
+    gap: 10px;
   }
 
-  .sidebar {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    align-items: start;
-  }
-
-  .history-card {
-    grid-column: 1 / -1;
+  .board-surface {
+    width: min(46vw, calc(100dvh - 100px));
   }
 }
 
-@media (max-width: 720px) {
+/* ─── Stack layout for small screens (<= 900px) ───── */
+@media (max-width: 900px) {
+  html,
+  body,
+  #root {
+    height: auto;
+    overflow: auto;
+  }
+
   .app-shell {
-    padding: 24px 16px 18px;
+    height: auto;
+    overflow: visible;
+    padding: 16px;
   }
 
-  .sidebar {
+  .workspace {
     grid-template-columns: 1fr;
+    grid-template-areas:
+      "board"
+      "left"
+      "right";
+    gap: 14px;
   }
 
+  .board-surface {
+    width: min(90vw, 480px);
+  }
+
+  .history-card {
+    flex: none;
+    max-height: 320px;
+  }
+
+  .eval-bar {
+    height: 160px;
+  }
+
+  .rank-list {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
   .controls-card {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .rank-list {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .eval-card {
-    grid-template-columns: 48px 1fr;
-  }
-
-  .eval-bar {
-    height: 180px;
+    grid-template-columns: 44px 1fr;
   }
 }
