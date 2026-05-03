@@ -168,20 +168,14 @@ function chooseEngineMove(chess, rankId) {
 }
 
 function applyMoveToPieceMap(pieceMap, move) {
-  const nextPieces = pieceMap.map((piece) => ({ ...piece }))
-  const movedPiece = nextPieces.find((piece) => piece.square === move.from)
   const capturedSquare = move.flags.includes('e') ? `${move.to[0]}${move.from[1]}` : move.to
-  const targetPiece = move.captured
-    ? nextPieces.find((piece) => piece.square === capturedSquare && piece.color !== move.color)
+  const capturedPiece = move.captured
+    ? pieceMap.find((piece) => piece.square === capturedSquare && piece.color !== move.color)
     : null
-
-  if (targetPiece) {
-    console.log('Capture detected in applyMoveToPieceMap:', { targetPiece, move })
-    const index = nextPieces.findIndex((piece) => piece.id === targetPiece.id)
-    nextPieces.splice(index, 1)
-  } else if (move.captured) {
-    console.warn('Capture expected but targetPiece not found!', { move, nextPieces })
-  }
+  const nextPieces = pieceMap
+    .filter((piece) => piece.id !== capturedPiece?.id)
+    .map((piece) => ({ ...piece }))
+  const movedPiece = nextPieces.find((piece) => piece.square === move.from)
 
   if (movedPiece) {
     movedPiece.square = move.to

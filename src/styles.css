@@ -327,6 +327,7 @@ button {
 }
 
 .piece-captured {
+  pointer-events: none;
   animation: capture-pop 220ms ease forwards;
 }
 
