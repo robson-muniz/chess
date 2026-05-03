@@ -142,6 +142,7 @@ function buildInitialState() {
   // playerColor = color the human controls; engineColor = the bot's color
   const playerColor = 'w'
   const engineColor = oppositeColor(playerColor)
+  const initialTime = 300 // 5 minutes
 
   return {
     snapshots:        [createSnapshot({ fen: chess.fen(), pieceMap, evaluation: evaluatePosition(chess) })],
@@ -158,6 +159,10 @@ function buildInitialState() {
     hint:             null,
     floatingBadge:    null,
     capturedAnimation: null,
+    gameResult:       { status: 'playing', reason: '' },
+    whiteTime:        initialTime,
+    blackTime:        initialTime,
+    timeConfig:       initialTime,
   }
 }
 
@@ -168,6 +173,8 @@ export const useChessStore = create((set, get) => ({
   // ── selectSquare ─────────────────────────────────────────────────────────
   selectSquare: (square) => {
     const state = get()
+    if (state.gameResult.status !== 'playing') return
+
     const chess = createChessFromState(state)
     const piece = chess.get(square)
 
@@ -217,6 +224,8 @@ export const useChessStore = create((set, get) => ({
   // ── playMove ──────────────────────────────────────────────────────────────
   playMove: (from, to) => {
     const state    = get()
+    if (state.gameResult.status !== 'playing') return
+
     const chess    = createChessFromState(state)
     const snapshot = currentSnapshot(state)
 
@@ -283,9 +292,24 @@ export const useChessStore = create((set, get) => ({
       }),
     )
 
+    // Check for game over
+    let newResult = { status: 'playing', reason: '' }
+    if (chess.isCheckmate()) {
+      newResult = { status: chess.turn() === 'w' ? 'black_won' : 'white_won', reason: 'by checkmate' }
+    } else if (chess.isStalemate()) {
+      newResult = { status: 'draw', reason: 'by stalemate' }
+    } else if (chess.isThreefoldRepetition()) {
+      newResult = { status: 'draw', reason: 'by repetition' }
+    } else if (chess.isInsufficientMaterial()) {
+      newResult = { status: 'draw', reason: 'insufficient material' }
+    } else if (chess.isDraw()) {
+      newResult = { status: 'draw', reason: '50-move rule' }
+    }
+    const isGameOver = newResult.status !== 'playing'
+
     // Queue engine response if needed
     const shouldQueueEngine =
-      state.mode === 'bot' && !chess.isGameOver() && chess.turn() === state.engineColor
+      state.mode === 'bot' && !isGameOver && chess.turn() === state.engineColor
     const pendingEngineMove = shouldQueueEngine ? chooseEngineMove(chess, state.botRank) : null
 
     set({
@@ -297,6 +321,7 @@ export const useChessStore = create((set, get) => ({
       capturedAnimation: capturedPiece
         ? { ...capturedPiece, key: `${capturedPiece.id}-${Date.now()}` }
         : null,
+      gameResult:       newResult,
       ...clearTransientState(),
     })
   },
@@ -394,6 +419,36 @@ export const useChessStore = create((set, get) => ({
   },
 
   dismissBadge: () => set({ floatingBadge: null }),
+
+  // ── tickClock ─────────────────────────────────────────────────────────────
+  tickClock: () => {
+    const state = get()
+    if (state.gameResult.status !== 'playing') return
+
+    const chess = createChessFromState(state)
+    const turn = chess.turn()
+
+    if (turn === 'w') {
+      const newTime = state.whiteTime - 1
+      if (newTime <= 0) {
+        set({ whiteTime: 0, gameResult: { status: 'black_won', reason: 'on time' } })
+      } else {
+        set({ whiteTime: newTime })
+      }
+    } else {
+      const newTime = state.blackTime - 1
+      if (newTime <= 0) {
+        set({ blackTime: 0, gameResult: { status: 'white_won', reason: 'on time' } })
+      } else {
+        set({ blackTime: newTime })
+      }
+    }
+  },
+
+  // ── resetGame ─────────────────────────────────────────────────────────────
+  resetGame: () => {
+    set({ ...buildInitialState() })
+  },
 }))
 
 // ─── Selectors ────────────────────────────────────────────────────────────────

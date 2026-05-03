@@ -10,6 +10,16 @@ const SHAPES = {
 export function PieceIcon({ type, color }) {
   return (
     <svg viewBox="0 0 100 100" className={`piece-svg ${color === 'w' ? 'is-white' : 'is-black'}`} aria-hidden="true">
+      <defs>
+        <linearGradient id="whitePieceGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#ffffff" />
+          <stop offset="100%" stopColor="#cfcfcf" />
+        </linearGradient>
+        <linearGradient id="blackPieceGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#555555" />
+          <stop offset="100%" stopColor="#111111" />
+        </linearGradient>
+      </defs>
       <path d={SHAPES[type]} />
     </svg>
   )

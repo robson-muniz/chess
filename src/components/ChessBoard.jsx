@@ -74,6 +74,8 @@ export function ChessBoard() {
             const fileLabel = orientation === 'white' ? FILES[index % 8] : [...FILES].reverse()[index % 8]
             const rankLabel = orientation === 'white' ? 8 - Math.floor(index / 8) : Math.floor(index / 8) + 1
 
+            const isLegalCapture = isLegal && snapshot.pieceMap.some((p) => p.square === square)
+
             return (
               <button
                 key={square}
@@ -82,16 +84,25 @@ export function ChessBoard() {
                   'board-square',
                   isLight ? 'light' : 'dark',
                   isSelected ? 'selected' : '',
-                  isLegal ? 'legal' : '',
+                  isLegal && !isLegalCapture ? 'legal' : '',
+                  isLegalCapture ? 'capture-hint' : '',
                   isLastMove ? 'last-move' : '',
                   moveGrade,
                   hintTone,
-                ].join(' ')}
+                ].filter(Boolean).join(' ')}
                 onClick={() => selectSquare(square)}
               >
                 {index % 8 === 0 && <span className="rank-label">{rankLabel}</span>}
                 {Math.floor(index / 8) === 7 && <span className="file-label">{fileLabel}</span>}
-                {isLegal && <span className="move-dot" />}
+                {isLegal && !isLegalCapture && <span className="move-dot" />}
+                {isLegalCapture && (
+                  <div className="capture-reticle">
+                    <div className="reticle-corner corner-tl" />
+                    <div className="reticle-corner corner-tr" />
+                    <div className="reticle-corner corner-bl" />
+                    <div className="reticle-corner corner-br" />
+                  </div>
+                )}
               </button>
             )
           })}

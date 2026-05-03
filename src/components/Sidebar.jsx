@@ -7,6 +7,7 @@ import {
   getStatusFromFen,
   useChessStore,
 } from '../store/useChessStore'
+import { Clock } from './Clock'
 
 /* ─── Eval Bar ─────────────────────────────────────── */
 function EvalBar({ score }) {
@@ -49,6 +50,7 @@ export function LeftPanel() {
 
   return (
     <>
+      <Clock color="b" />
       <EvalBar score={snapshot.evaluation} />
 
       <section className="panel status-card">
@@ -114,6 +116,8 @@ export function LeftPanel() {
           <p className="muted">Top continuation available.</p>
         </section>
       )}
+
+      <Clock color="w" />
     </>
   )
 }

@@ -1,8 +1,10 @@
 import { useEffect, useRef } from 'react'
 import { ChessBoard } from './components/ChessBoard'
 import { LeftPanel, RightPanel } from './components/Sidebar'
+import { GameOverModal } from './components/GameOverModal'
 import { playCaptureSound, playMoveSound } from './lib/sound'
 import { useChessStore } from './store/useChessStore'
+import { useChessClock } from './hooks/useChessClock'
 
 export default function App() {
   const snapshots = useChessStore((state) => state.snapshots)
@@ -10,6 +12,9 @@ export default function App() {
   const pendingEngineMove = useChessStore((state) => state.pendingEngineMove)
   const playPendingEngineMove = useChessStore((state) => state.playPendingEngineMove)
   const lastPlayedMoveRef = useRef(null)
+
+  // Initialize clock hook
+  useChessClock()
 
   const snapshot = snapshots[pointer]
   const move = snapshot?.move ?? null
@@ -37,6 +42,7 @@ export default function App() {
   return (
     <main className="app-shell">
       <div className="app-backdrop" />
+      <GameOverModal />
 
       {/* ── Slim top bar ── */}
       <header className="top-bar">

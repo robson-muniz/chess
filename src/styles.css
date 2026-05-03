@@ -264,6 +264,61 @@ button {
   border: 1px solid rgba(255, 255, 255, 0.18);
 }
 
+/* ─── Capture Reticle Overlay ─────────────────────── */
+.capture-reticle {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+  animation: reticle-pulse 2s ease-in-out infinite;
+}
+
+/* Hovering the square locks the opacity and stops breathing */
+.board-square:hover .capture-reticle {
+  animation: none;
+  opacity: 1;
+}
+
+.reticle-corner {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-color: #F72585;
+  border-style: solid;
+  filter: drop-shadow(0 0 4px rgba(247, 37, 133, 0.8));
+  transition: transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* Corner Positioning & Inward Hover Translation */
+.corner-tl {
+  top: 6px; left: 6px;
+  border-width: 3px 0 0 3px;
+}
+.board-square:hover .corner-tl { transform: translate(4px, 4px); }
+
+.corner-tr {
+  top: 6px; right: 6px;
+  border-width: 3px 3px 0 0;
+}
+.board-square:hover .corner-tr { transform: translate(-4px, 4px); }
+
+.corner-bl {
+  bottom: 6px; left: 6px;
+  border-width: 0 0 3px 3px;
+}
+.board-square:hover .corner-bl { transform: translate(4px, -4px); }
+
+.corner-br {
+  bottom: 6px; right: 6px;
+  border-width: 0 3px 3px 0;
+}
+.board-square:hover .corner-br { transform: translate(-4px, -4px); }
+
+@keyframes reticle-pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
 /* ─── Move Quality Tones ─────────────────────────── */
 .board-square.best,
 .floating-badge.best,
@@ -386,19 +441,21 @@ button {
   filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.35));
 }
 
+/* ─── Premium Traditional Pieces ──────────────────── */
 .piece-svg path {
-  stroke-width: 5;
+  stroke: rgba(0, 0, 0, 0.95);
+  stroke-width: 4.5;
   stroke-linejoin: round;
+  /* Strong inset and drop shadow to give 3D volume */
+  filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.55));
 }
 
 .piece-svg.is-white path {
-  fill: #f9efe3;
-  stroke: #e1bf93;
+  fill: url(#whitePieceGrad);
 }
 
 .piece-svg.is-black path {
-  fill: #172535;
-  stroke: #7ecfff;
+  fill: url(#blackPieceGrad);
 }
 
 .piece-captured {
@@ -626,6 +683,98 @@ button {
 /* Hint card */
 .hint-card h3 {
   font-size: 1rem;
+}
+
+/* ─── Chess Clock ───────────────────────────────────── */
+.chess-clock {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  border-radius: 20px;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  backdrop-filter: blur(18px);
+  box-shadow: var(--shadow);
+  color: var(--muted);
+  font-size: 1.6rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  transition: all 200ms ease;
+}
+
+.chess-clock.is-active {
+  color: var(--text);
+  background: rgba(30, 41, 59, 0.85);
+  border-color: rgba(127, 208, 255, 0.45);
+  box-shadow: 0 0 20px rgba(127, 208, 255, 0.15);
+}
+
+.chess-clock.is-danger {
+  color: #F72585;
+  border-color: rgba(247, 37, 133, 0.45);
+  animation: reticle-pulse 1s infinite;
+}
+
+/* ─── Game Over Modal ───────────────────────────────── */
+.game-over-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 100;
+  background: rgba(4, 9, 21, 0.7);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: backdrop-fade-in 300ms ease;
+}
+
+.game-over-modal {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  padding: 32px 40px;
+  border-radius: 24px;
+  box-shadow: 0 32px 64px rgba(0, 0, 0, 0.6);
+  text-align: center;
+  animation: modal-pop-in 400ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.game-over-modal .modal-title {
+  font-size: 2rem;
+  margin: 0 0 8px;
+  background: linear-gradient(90deg, #eff5ff, #7fd0ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.game-over-modal .reason-text {
+  color: var(--muted);
+  font-size: 1rem;
+  margin: 0 0 24px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.game-over-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+@keyframes backdrop-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modal-pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 /* ─── Animations ──────────────────────────────────── */
