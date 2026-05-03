@@ -170,13 +170,17 @@ function chooseEngineMove(chess, rankId) {
 function applyMoveToPieceMap(pieceMap, move) {
   const nextPieces = pieceMap.map((piece) => ({ ...piece }))
   const movedPiece = nextPieces.find((piece) => piece.square === move.from)
-  const targetPiece = nextPieces.find(
-    (piece) => piece.square === move.to || (move.flags.includes('e') && piece.square === `${move.to[0]}${move.from[1]}`),
-  )
+  const capturedSquare = move.flags.includes('e') ? `${move.to[0]}${move.from[1]}` : move.to
+  const targetPiece = move.captured
+    ? nextPieces.find((piece) => piece.square === capturedSquare && piece.color !== move.color)
+    : null
 
   if (targetPiece) {
+    console.log('Capture detected in applyMoveToPieceMap:', { targetPiece, move })
     const index = nextPieces.findIndex((piece) => piece.id === targetPiece.id)
     nextPieces.splice(index, 1)
+  } else if (move.captured) {
+    console.warn('Capture expected but targetPiece not found!', { move, nextPieces })
   }
 
   if (movedPiece) {
@@ -243,6 +247,7 @@ export const useChessStore = create((set, get) => ({
 
     const best = rankedMoves[0]
     const move = chess.move(promoteIfNeeded({ from, to }))
+    console.log('Move executed in playMove:', move)
     const classification = classifyMove(best.moverEval, chosen.moverEval)
     const nextPieceMap = applyMoveToPieceMap(snapshot.pieceMap, move)
     const evaluation = evaluatePosition(chess)
