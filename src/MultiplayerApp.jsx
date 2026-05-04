@@ -7,8 +7,9 @@ const SYMBOL = {
   bp:'♟', br:'♜', bn:'♞', bb:'♝', bq:'♛', bk:'♚',
 }
 
-const API_BASE_URL = `${window.location.protocol}//${window.location.hostname}:3001`
-const WS_URL = `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.hostname}:3001`
+const DEFAULT_API_BASE_URL = `${window.location.protocol}//${window.location.hostname}:3001`
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || DEFAULT_API_BASE_URL
+const WS_URL = import.meta.env.VITE_WS_URL || `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.hostname}:3001`
 
 function Home() {
   const [loading, setLoading] = useState(false)
@@ -16,14 +17,22 @@ function Home() {
   const createGame = async () => {
     setError('')
     setLoading(true)
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 10000)
+
     try {
-      const res = await fetch(`${API_BASE_URL}/api/games`, { method: 'POST' })
+      const res = await fetch(`${API_BASE_URL}/api/games`, { method: 'POST', signal: controller.signal })
       if (!res.ok) throw new Error(`Request failed (${res.status})`)
       const data = await res.json()
       window.location.href = `/game/${data.gameId}`
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to create game')
+      if (err instanceof DOMException && err.name === 'AbortError') {
+        setError('Create game request timed out. Make sure the server is running on port 3001.')
+      } else {
+        setError(err instanceof Error ? err.message : 'Unable to create game')
+      }
     } finally {
+      clearTimeout(timeout)
       setLoading(false)
     }
   }
