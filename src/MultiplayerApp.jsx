@@ -7,17 +7,27 @@ const SYMBOL = {
   bp:'♟', br:'♜', bn:'♞', bb:'♝', bq:'♛', bk:'♚',
 }
 
+const API_BASE_URL = `${window.location.protocol}//${window.location.hostname}:3001`
 const WS_URL = `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.hostname}:3001`
 
 function Home() {
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
   const createGame = async () => {
+    setError('')
     setLoading(true)
-    const res = await fetch('http://localhost:3001/api/games', { method: 'POST' })
-    const data = await res.json()
-    window.location.href = `/game/${data.gameId}`
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/games`, { method: 'POST' })
+      if (!res.ok) throw new Error(`Request failed (${res.status})`)
+      const data = await res.json()
+      window.location.href = `/game/${data.gameId}`
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to create game')
+    } finally {
+      setLoading(false)
+    }
   }
-  return <div className="mp-home"><button onClick={createGame} disabled={loading}>{loading ? 'Creating...' : 'Create Game'}</button></div>
+  return <div className="mp-home"><button onClick={createGame} disabled={loading}>{loading ? 'Creating...' : 'Create Game'}</button>{error && <p style={{color:'#ff8f8f'}}>{error}</p>}</div>
 }
 
 function Game({ gameId }) {
