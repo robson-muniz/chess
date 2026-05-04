@@ -8,13 +8,8 @@ const SYMBOL = {
 }
 
 const isLocalHost = ['localhost', '127.0.0.1'].includes(window.location.hostname)
-const DEFAULT_API_BASE_URL = isLocalHost
-  ? `${window.location.protocol}//${window.location.hostname}:3001`
-  : window.location.origin
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || DEFAULT_API_BASE_URL).replace(/\/$/, '')
-const WS_URL = import.meta.env.VITE_WS_URL || (isLocalHost
-  ? `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.hostname}:3001`
-  : null)
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '')
+const WS_URL = import.meta.env.VITE_WS_URL || (isLocalHost ? `ws://${window.location.hostname}:3001` : null)
 
 function Home() {
   const [loading, setLoading] = useState(false)
