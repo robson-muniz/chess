@@ -7,9 +7,14 @@ const SYMBOL = {
   bp:'♟', br:'♜', bn:'♞', bb:'♝', bq:'♛', bk:'♚',
 }
 
-const DEFAULT_API_BASE_URL = `${window.location.protocol}//${window.location.hostname}:3001`
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || DEFAULT_API_BASE_URL
-const WS_URL = import.meta.env.VITE_WS_URL || `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.hostname}:3001`
+const isLocalHost = ['localhost', '127.0.0.1'].includes(window.location.hostname)
+const DEFAULT_API_BASE_URL = isLocalHost
+  ? `${window.location.protocol}//${window.location.hostname}:3001`
+  : window.location.origin
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || DEFAULT_API_BASE_URL).replace(/\/$/, '')
+const WS_URL = import.meta.env.VITE_WS_URL || (isLocalHost
+  ? `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.hostname}:3001`
+  : null)
 
 function Home() {
   const [loading, setLoading] = useState(false)
@@ -21,13 +26,17 @@ function Home() {
     const timeout = setTimeout(() => controller.abort(), 10000)
 
     try {
-      const res = await fetch(`${API_BASE_URL}/api/games`, { method: 'POST', signal: controller.signal })
+      const res = await fetch(`${API_BASE_URL}/api/games`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        signal: controller.signal,
+      })
       if (!res.ok) throw new Error(`Request failed (${res.status})`)
       const data = await res.json()
       window.location.href = `/game/${data.gameId}`
     } catch (err) {
       if (err instanceof DOMException && err.name === 'AbortError') {
-        setError('Create game request timed out. Make sure the server is running on port 3001.')
+        setError('Create game request timed out. Check API_URL/route deployment and try again.')
       } else {
         setError(err instanceof Error ? err.message : 'Unable to create game')
       }
@@ -53,6 +62,11 @@ function Game({ gameId }) {
   }, [state?.fen])
 
   useEffect(() => {
+    if (!WS_URL) {
+      setError('Missing VITE_WS_URL in production. Configure a deployed websocket backend URL.')
+      return
+    }
+
     const socket = new WebSocket(WS_URL)
     setWs(socket)
     socket.onopen = () => {
