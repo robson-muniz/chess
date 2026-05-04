@@ -905,3 +905,10 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;background:ra
 .clock-player{display:flex;align-items:center;gap:10px;}.clock-avatar{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 30% 20%,#f2ddac,#9d7a45);color:#281f14;font-size:1.1rem;box-shadow:inset 0 0 0 1px rgba(255,255,255,.45);}.clock-name{margin:0;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:#d8c9a5;}.clock-rank{margin:2px 0 0;font-size:.68rem;color:var(--muted);}
 .chess-clock{justify-content:space-between;gap:12px;}.clock-time{font-size:1.8rem;letter-spacing:.04em;}
 .chess-clock.is-danger .clock-time{color:#ff6b95;text-shadow:0 0 16px rgba(255,56,112,.4);}
+
+.mp-home,.mp-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100dvh;gap:10px;padding:20px}
+.mp-home button{padding:12px 16px;border-radius:10px;border:1px solid #7fd0ff;background:#0d1b2d;color:#eff5ff;cursor:pointer}
+.mp-board{display:grid;grid-template-columns:repeat(8,60px);border:1px solid #fff3;border-radius:8px;overflow:hidden}
+.mp-square{width:60px;height:60px;border:0;font-size:38px;cursor:pointer}
+.mp-square.light{background:#ead7b8}.mp-square.dark{background:#7f5f47}
+.mp-square.selected{outline:3px solid #44d1ff}
