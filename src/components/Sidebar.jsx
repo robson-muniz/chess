@@ -9,26 +9,22 @@ import {
 } from '../store/useChessStore'
 import { Clock } from './Clock'
 
-/* ─── Eval Bar ─────────────────────────────────────── */
 function EvalBar({ score }) {
   const clamped = Math.max(-6, Math.min(6, score))
   const fill = ((clamped + 6) / 12) * 100
 
   return (
     <div className="eval-card">
-      <div className="eval-bar">
-        <div className="eval-fill" style={{ height: `${fill}%` }} />
-      </div>
+      <div className="eval-bar"><div className="eval-fill" style={{ height: `${fill}%` }} /></div>
       <div>
         <p className="panel-label">Evaluation</p>
         <strong className="eval-score">{formatEval(score)}</strong>
-        <p className="muted">Positive favors White.</p>
+        <p className="muted">Engine perspective</p>
       </div>
     </div>
   )
 }
 
-/* ─── Left Panel (eval + status + controls) ─────────── */
 export function LeftPanel() {
   const snapshots = useChessStore((state) => state.snapshots)
   const pointer = useChessStore((state) => state.pointer)
@@ -50,118 +46,41 @@ export function LeftPanel() {
 
   return (
     <>
-      <Clock color="b" />
+      <Clock color="b" playerName="Astra Engine" rank={`${activeRank.elo} ELO`} avatar="♚" />
       <EvalBar score={snapshot.evaluation} />
-
       <section className="panel status-card">
-        <p className="panel-label">Game status</p>
-        <h2>{status}</h2>
-        <p className="mode-pill">{mode === 'bot' ? 'Vs Bot' : 'Analysis'}</p>
-        {mode === 'bot' && (
-          <p className="rank-pill">{activeRank.label} · {activeRank.elo} Elo</p>
-        )}
-        {isEngineThinking && <p className="thinking-line">Thinking…</p>}
+        <p className="panel-label">Match</p><h2>{status}</h2>
+        <p className="mode-pill">{mode === 'bot' ? 'Duel Mode' : 'Studio Analysis'}</p>
+        {isEngineThinking && <p className="thinking-line">Calculating best line…</p>}
       </section>
-
       <section className="panel controls-card controls-card-modes">
-        <button
-          type="button"
-          className={`ui-button ${mode === 'bot' ? 'is-active' : ''}`}
-          onClick={() => setMode('bot')}
-        >
-          Vs Bot
-        </button>
-        <button
-          type="button"
-          className={`ui-button ${mode === 'analysis' ? 'is-active' : ''}`}
-          onClick={() => setMode('analysis')}
-        >
-          Analysis
-        </button>
+        <button type="button" className={`ui-button ${mode === 'bot' ? 'is-active' : ''}`} onClick={() => setMode('bot')}>Duel</button>
+        <button type="button" className={`ui-button ${mode === 'analysis' ? 'is-active' : ''}`} onClick={() => setMode('analysis')}>Analyze</button>
       </section>
-
-      {mode === 'bot' && (
-        <section className="panel rank-card">
-          <div className="history-head">
-            <p className="panel-label">Bot rank</p>
-            <span className="muted">{activeRank.description}</span>
-          </div>
-          <div className="rank-list">
-            {ranks.map((rank) => (
-              <button
-                key={rank.id}
-                type="button"
-                className={`rank-option ${rank.id === botRank ? 'is-active' : ''}`}
-                onClick={() => setBotRank(rank.id)}
-              >
-                <strong>{rank.label}</strong>
-                <span>{rank.elo} Elo</span>
-              </button>
-            ))}
-          </div>
-        </section>
-      )}
-
+      {mode === 'bot' && <section className="panel rank-card"><div className="history-head"><p className="panel-label">Engine persona</p></div><div className="rank-list">{ranks.map((rank) => <button key={rank.id} type="button" className={`rank-option ${rank.id === botRank ? 'is-active' : ''}`} onClick={() => setBotRank(rank.id)}><strong>{rank.label}</strong><span>{rank.elo} Elo</span></button>)}</div></section>}
       <section className="panel controls-card">
         <button type="button" className="ui-button" onClick={undo}>Undo</button>
         <button type="button" className="ui-button" onClick={redo}>Redo</button>
-        <button type="button" className="ui-button" onClick={flipBoard}>Flip</button>
+        <button type="button" className="ui-button" onClick={flipBoard}>Rotate</button>
         <button type="button" className="ui-button ui-button-strong" onClick={showHint}>Hint</button>
       </section>
-
-      {hint && (
-        <section className="panel hint-card">
-          <p className="panel-label">Suggested move</p>
-          <h3>{hint.text}</h3>
-          <p className="muted">Top continuation available.</p>
-        </section>
-      )}
-
-      <Clock color="w" />
+      {hint && <section className="panel hint-card"><p className="panel-label">Suggested move</p><h3>{hint.text}</h3><p className="muted">Top continuation available.</p></section>}
+      <Clock color="w" playerName="You" rank="Challenger" avatar="♔" />
     </>
   )
 }
 
-/* ─── Right Panel (move history) ────────────────────── */
 export function RightPanel() {
   const snapshots = useChessStore((state) => state.snapshots)
   const pointer = useChessStore((state) => state.pointer)
   const moveHistory = getMoveHistory(snapshots)
-
-  // Unused but keeps selector stable
   void pointer
-
   return (
     <section className="panel history-card">
-      <div className="history-head">
-        <p className="panel-label">Move history</p>
-        <span className="muted">{moveHistory.length} plies</span>
-      </div>
-
-      <div className="history-list">
-        {moveHistory.length === 0 && (
-          <p className="muted">No moves yet. Select a piece to begin.</p>
-        )}
-        {moveHistory.map((entry, index) => (
-          <article
-            className="history-row"
-            key={`${entry.ply}-${entry.san}-${index}`}
-          >
-            <span className="move-index">{entry.ply}.</span>
-            <div>
-              <strong>{entry.san}</strong>
-              <p className={`quality-tag ${entry.classification?.id ?? ''}`}>
-                {entry.classification?.label ?? 'Played'} · {formatEval(entry.evaluation)}
-              </p>
-            </div>
-          </article>
-        ))}
-      </div>
+      <div className="history-head"><p className="panel-label">Move history</p><span className="muted">{moveHistory.length} plies</span></div>
+      <div className="history-list">{moveHistory.length === 0 ? <p className="muted">No moves yet. Select a piece to begin.</p> : moveHistory.map((entry, index) => <article className="history-row" key={`${entry.ply}-${entry.san}-${index}`}><span className="move-index">{entry.ply}.</span><div><strong>{entry.san}</strong><p className={`quality-tag ${entry.classification?.id ?? ''}`}>{entry.classification?.label ?? 'Played'} · {formatEval(entry.evaluation)}</p></div></article>)}</div>
     </section>
   )
 }
 
-/* ─── Legacy export (unused, kept for safety) ────────── */
-export function Sidebar() {
-  return null
-}
+export function Sidebar() { return null }

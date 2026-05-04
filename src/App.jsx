@@ -47,8 +47,8 @@ export default function App() {
       {/* ── Slim top bar ── */}
       <header className="top-bar">
         <div className="top-bar-brand">
-          <h1>Pulse Chess</h1>
-          <span className="top-bar-badge">Premium Analysis</span>
+          <h1>Nocturne Chess</h1>
+          <span className="top-bar-badge">Cinematic Edition</span>
         </div>
       </header>
 

@@ -884,3 +884,24 @@ button {
     grid-template-columns: 44px 1fr;
   }
 }
+
+
+/* premium redesign overrides */
+:root {
+  --bg:#06070d; --panel:rgba(14,16,28,.72); --panel-border:rgba(197,181,132,.22);
+  --text:#f4f1e8; --muted:#a4a0b8; --light-square:linear-gradient(145deg,#d9ccb4,#c6b294);
+  --dark-square:linear-gradient(145deg,#544435,#3d3127);
+}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(circle at 50% 110%,rgba(214,171,92,.18),transparent 45%),radial-gradient(circle at 10% 10%,rgba(110,143,215,.15),transparent 35%);}
+.top-bar{padding:8px 10px 0}.top-bar-brand h1{font-size:1.4rem;letter-spacing:.04em;text-transform:uppercase;background:linear-gradient(90deg,#f5f2e6,#d2b372);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.top-bar-badge{background:rgba(210,179,114,.12);border-color:rgba(210,179,114,.35);color:#e8cd98;}
+.panel,.eval-card,.board-frame,.chess-clock{backdrop-filter:blur(22px);box-shadow:0 30px 80px rgba(0,0,0,.5);}
+.board-frame{border-radius:34px;padding:16px;background:linear-gradient(160deg,rgba(12,15,28,.9),rgba(29,22,17,.55));}
+.board-surface{border-radius:20px;box-shadow:inset 0 0 0 1px rgba(235,220,186,.2),0 30px 80px rgba(0,0,0,.45);}
+.board-square.last-move{box-shadow:inset 0 0 0 999px rgba(212,169,92,.18);}
+.ui-button{background:linear-gradient(145deg,rgba(255,255,255,.05),rgba(255,255,255,.01));border:1px solid rgba(212,169,92,.25);}
+.ui-button:hover{border-color:rgba(236,198,126,.55);box-shadow:0 8px 25px rgba(212,169,92,.18);}
+.ui-button.ui-button-strong,.ui-button.is-active{background:linear-gradient(145deg,rgba(224,185,112,.25),rgba(122,147,198,.2));}
+.clock-player{display:flex;align-items:center;gap:10px;}.clock-avatar{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 30% 20%,#f2ddac,#9d7a45);color:#281f14;font-size:1.1rem;box-shadow:inset 0 0 0 1px rgba(255,255,255,.45);}.clock-name{margin:0;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:#d8c9a5;}.clock-rank{margin:2px 0 0;font-size:.68rem;color:var(--muted);}
+.chess-clock{justify-content:space-between;gap:12px;}.clock-time{font-size:1.8rem;letter-spacing:.04em;}
+.chess-clock.is-danger .clock-time{color:#ff6b95;text-shadow:0 0 16px rgba(255,56,112,.4);}
